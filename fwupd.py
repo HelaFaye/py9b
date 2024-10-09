@@ -38,7 +38,7 @@ def UpdateFirmware(link, tran, dev, fwfile):
             continue
         break
     else:
-        print("Timed out !")
+        print("Timed out!")
         return False
     print("OK")
 
@@ -52,31 +52,37 @@ def UpdateFirmware(link, tran, dev, fwfile):
     tran.execute(StartUpdate(dev, fw_size))
 
     print("Writing...")
-    pb = ProgressBar(maxval=fw_size // fw_page_size + 1).start()
+    total_pages = fw_size // fw_page_size + (1 if fw_size % fw_page_size else 0)
+    pb = ProgressBar(maxval=total_pages).start()
     page = 0
     chk = 0
-    while fw_size:
-        pb.update(page)
+
+    while fw_size > 0:
         chunk_sz = min(fw_size, fw_page_size)
         data = fwfile.read(chunk_sz)
         chk = checksum(chk, data)
-        # tran.execute(WriteUpdate(dev, page, data))
-        tran.execute(
-            WriteUpdate(dev, page, data + b"\x00" * (fw_page_size - chunk_sz))
-        )  # TODO: Ninebot wants this padding. Will it work on M365 too?
+        
+        # Send the WriteUpdate command
+        tran.execute(WriteUpdate(dev, page, data + b"\x00" * (fw_page_size - chunk_sz)))
+        
         page += 1
         fw_size -= chunk_sz
+        
+        # Update the progress bar
+        pb.update(page)
+
     pb.finish()
 
     print("Finalizing...")
     tran.execute(FinishUpdate(dev, chk ^ 0xFFFFFFFF))
 
-    print("Reboot")
+    print("Rebooting...")
     tran.execute(RebootUpdate(dev))
     print("Done")
     return True
 
 
+# The rest of your script remains unchanged
 ##########################################################################################
 
 parser = argparse.ArgumentParser(
@@ -124,35 +130,33 @@ if len(argv) == 1:
 args = parser.parse_args()
 
 if args.device == "extbms" and args.protocol != "ninebot":
-    exit("Only Ninebot supports External BMS !")
+    exit("Only Ninebot supports External BMS!")
 
 dev = devices.get(args.device)
 
 if args.interface == "ble":
     try:
         from py9b.link.ble import BLELink
-    except:
-        exit("BLE is not supported on your system !")
+    except ImportError:
+        exit("BLE is not supported on your system!")
     link = BLELink()
 elif args.interface == "tcp":
     from py9b.link.tcp import TCPLink
-
     link = TCPLink()
 elif args.interface == "serial":
     from py9b.link.serial import SerialLink
-
     link = SerialLink()
 elif args.interface == "blefleet":
     try:
         from py9b.link.blefleet import BLELink
-    except:
-        exit("BLE is not supported on your system !")
+    except ImportError:
+        exit("BLE is not supported on your system!")
     link = BLELink()
 elif args.interface == "bleak":
     try:
         from py9b.link.bleak import BleakLink
-    except:
-        exit("BLE is not supported on your system !")
+    except ImportError:
+        exit("BLE is not supported on your system!")
     link = BleakLink()
 else:
     exit("!!! BUG !!! Unknown interface selected: " + args.interface)
@@ -166,7 +170,7 @@ with link:
         print("Scanning...")
         ports = link.scan()
         if not ports:
-            exit("No interfaces found !")
+            exit("No interfaces found!")
         print("Connecting to", ports[0][0])
         addr = ports[0][1]
 
