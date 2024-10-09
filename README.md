@@ -10,8 +10,12 @@ DO NOT USE THIS ON SCOOTERS THAT DON'T BELONG TO YOU!!!
 Other tools are highly experimental.
 
 ## Requirements
-* Python 2.x.x [www.python.org]
-* ProgressBar [pip install progressbar]
-* PySerial [pip install pyserial] - for direct serial link backend
+* Python 3 [www.python.org]
+* ProgressBar [pip install progressbar2]
+* PySerial [pip install pyserial] - for direct serial UART backend
 * PyGatt [pip install pygatt] - for BLED112 dongle backend
+* Bleak [pip install bleak] - for Bleak cross-platform BLE backend
+* ABLE [https://github.com/b3b/able] - for deprecated Android BLE backend
+* usb4a [pip install usb4a] and usbserial4a [pip install usbserial4a] - for Android USB serial implementation
+* threading [pip install threading] - for multithreading
 * nRFUARTBridge [https://github.com/flowswitch/nRFUARTBridge] - for Android BLE-TCP backend
