@@ -6,8 +6,7 @@ DO NOT USE THIS ON SCOOTERS THAT DON'T BELONG TO YOU!!!
 
 ## Tools
 * fwupd.py - firmware flasher capable of flashing BLE/ESC/BMS
-* readregs.py - ESC/BMS register file dumper
-Other tools are highly experimental.
+* cli.py - command line interface for a variety of functions
 
 ## Requirements
 * Python 3 [www.python.org]
